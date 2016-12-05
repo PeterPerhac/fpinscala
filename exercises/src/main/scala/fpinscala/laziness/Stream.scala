@@ -3,6 +3,8 @@ package fpinscala.laziness
 import Stream._
 trait Stream[+A] {
 
+  def toList: List[A] = foldRight(Nil:List[A]){ _ :: _ }
+
   def foldRight[B](z: => B)(f: (A, => B) => B): B = // The arrow `=>` in front of the argument type `B` means that the function `f` takes its second argument by name and may choose not to evaluate it.
     this match {
       case Cons(h,t) => f(h(), t().foldRight(z)(f)) // If `f` doesn't evaluate its second argument, the recursion never occurs.
@@ -17,11 +19,22 @@ trait Stream[+A] {
     case Empty => None
     case Cons(h, t) => if (f(h())) Some(h()) else t().find(f)
   }
-  def take(n: Int): Stream[A] = sys.error("todo")
 
-  def drop(n: Int): Stream[A] = sys.error("todo")
+  def take(n: Int): Stream[A] = this match {
+    case Cons(h, _) if n == 1 => cons(h(), empty)
+    case Cons(h, t) => cons(h(), t().take(n - 1))
+    case _ => empty
+  }
 
-  def takeWhile(p: A => Boolean): Stream[A] = sys.error("todo")
+  def drop(n: Int): Stream[A] = this match {
+    case Cons(_, t) if n > 0 => t().drop(n - 1)
+    case _ => this
+  }
+
+  def takeWhile(p: A => Boolean): Stream[A] = this match {
+    case Cons(h, t) if p(h()) => cons(h(), t() takeWhile p)
+    case _ => empty
+  }
 
   def forAll(p: A => Boolean): Boolean = sys.error("todo")
 
@@ -35,12 +48,22 @@ trait Stream[+A] {
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
 
-object Stream {
-  def cons[A](hd: => A, tl: => Stream[A]): Stream[A] = {
-    lazy val head = hd
-    lazy val tail = tl
-    Cons(() => head, () => tail)
+object TestApp {
+  def main(args: Array[String]): Unit = {
+
+    val s = Stream(1,2,3,4,5)
+    println(s.toList)
+    println((s take 2).toList)
+    println((s drop 2).toList)
+    println((s takeWhile (n => n<4)).toList)
+
+    val prints = Stream(() => { println("hello")}, () => { println("world")}, () => { do { ;} while (true)})
+    prints.take(2).toList.foreach(fu => fu())
   }
+}
+
+object Stream {
+  def cons[A](hd: => A, tl: => Stream[A]): Stream[A] = Cons(() => hd, () => tl)
 
   def empty[A]: Stream[A] = Empty
 
