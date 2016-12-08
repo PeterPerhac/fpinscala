@@ -67,6 +67,10 @@ trait Stream[+A] {
     case Cons(h, t) if p(h()) => Some((h(), t()))
     case _ => None
   }
+  def zipWith[B, C](s: Stream[B])(f: (A, B) => C): Stream[C] = unfold((this, s)){
+    case (Cons(h,t), Cons(h2,t2)) => Some((f(h(), h2()), (t(), t2())))
+    case _ => None
+  }
 
   def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
 }
@@ -114,6 +118,11 @@ object TestApp {
     println("=====")
     Stream(1, 2, 3).flatmap(n => Stream(n - 1, n, n + 1)).toList.foreach(print)
     println()
+
+    println("somar")
+    val stream = from(1).zipWith(Stream("Peter", "Tomas", "Andrej", "Bobor", "Fafek", "Sumichrast" ))(_.toString.concat("_").concat(_))
+    (stream take 4 ).toList.foreach(println)
+
 
   }
 }
