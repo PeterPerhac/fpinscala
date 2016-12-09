@@ -119,7 +119,7 @@ trait Stream[+A] {
   def takeViaUnfold(n: Int): Stream[A] =
     unfold((this,n)) {
       case (Cons(h,t), 1) => Some((h(), (empty, 0)))
-      case (Cons(h,t), n) if n > 1 => Some((h(), (t(), n-1)))
+      case (Cons(h,t), c) if c > 1 => Some((h(), (t(), c-1)))
       case _ => None
     }
 
@@ -153,10 +153,14 @@ trait Stream[+A] {
     }
 
   /*
-  `s startsWith s2` when corresponding elements of `s` and `s2` are all equal, until the point that `s2` is exhausted. If `s` is exhausted first, or we find an element that doesn't match, we terminate early. Using non-strictness, we can compose these three separate logical steps--the zipping, the termination when the second stream is exhausted, and the termination if a nonmatching element is found or the first stream is exhausted.
+  `s startsWith s2` when corresponding elements of `s` and `s2` are all equal,
+   until the point that `s2` is exhausted. If `s` is exhausted first, or we find an element that doesn't match,
+    we terminate early. Using non-strictness, we can compose these three separate logical steps--the zipping,
+    the termination when the second stream is exhausted,
+     and the termination if a nonmatching element is found or the first stream is exhausted.
   */
-  def startsWith[A](s: Stream[A]): Boolean =
-    zipAll(s).takeWhile(!_._2.isEmpty) forAll {
+  def startsWith[B >: A](s: Stream[B]): Boolean =
+    zipAll(s).takeWhile(_._2.isDefined) forAll {
       case (h,h2) => h == h2
     }
 
@@ -169,8 +173,7 @@ trait Stream[+A] {
       case s => Some((s, s drop 1))
     } append Stream(empty)
 
-  def hasSubsequence[A](s: Stream[A]): Boolean =
-    tails exists (_ startsWith s)
+  def hasSubsequence[B >: A](s: Stream[B]): Boolean = tails exists (_ startsWith s)
 
   /*
   The function can't be implemented using `unfold`, since `unfold` generates elements of the `Stream` from left to right. It can be implemented using `foldRight` though.
@@ -219,7 +222,7 @@ object Stream {
   def from(n: Int): Stream[Int] =
     cons(n, from(n+1))
 
-  val fibs = {
+  val fibs: Stream[Int] = {
     def go(f0: Int, f1: Int): Stream[Int] =
       cons(f0, go(f1, f0+f1))
     go(0, 1)
@@ -243,15 +246,15 @@ object Stream {
   /*
   Scala provides shorter syntax when the first action of a function literal is to match on an expression.  The function passed to `unfold` in `fibsViaUnfold` is equivalent to `p => p match { case (f0,f1) => ... }`, but we avoid having to choose a name for `p`, only to pattern match on it.
   */
-  val fibsViaUnfold =
+  val fibsViaUnfold: Stream[Int] =
     unfold((0,1)) { case (f0,f1) => Some((f0,(f1,f0+f1))) }
 
-  def fromViaUnfold(n: Int) =
+  def fromViaUnfold(n: Int): Stream[Int] =
     unfold(n)(n => Some((n,n+1)))
 
-  def constantViaUnfold[A](a: A) =
+  def constantViaUnfold[A](a: A): Stream[A] =
     unfold(a)(_ => Some((a,a)))
 
   // could also of course be implemented as constant(1)
-  val onesViaUnfold = unfold(1)(_ => Some((1,1)))
+  val onesViaUnfold: Stream[Int] = unfold(1)(_ => Some((1,1)))
 }

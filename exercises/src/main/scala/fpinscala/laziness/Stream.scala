@@ -72,7 +72,23 @@ trait Stream[+A] {
     case _ => None
   }
 
-  def startsWith[B](s: Stream[B]): Boolean = sys.error("todo")
+  def zipAll[B](s2: Stream[B]): Stream[(Option[A], Option[B])] = zipWithAll(s2)((_, _))
+
+  def zipWithAll[B, C](s2: Stream[B])(f: (Option[A], Option[B]) => C): Stream[C] =
+    Stream.unfold((this, s2)) {
+      case (Empty, Empty) => None
+      case (Cons(h, t), Empty) => Some(f(Some(h()), Option.empty[B]) -> (t(), empty[B]))
+      case (Empty, Cons(h, t)) => Some(f(Option.empty[A], Some(h())) -> (empty[A] -> t()))
+      case (Cons(h1, t1), Cons(h2, t2)) => Some(f(Some(h1()), Some(h2())) -> (t1() -> t2()))
+    }
+
+  def startsWith[B](s: Stream[B]): Boolean = zipAll(s) takeWhile (_._2.isDefined) forAll (t => t._1 == t._2)
+
+  def tails: Stream[Stream[A]] = unfold(this) {
+    case Cons(h, t) => Some((Cons(h, t), t()))
+    case _ => None
+  }
+
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -123,7 +139,14 @@ object TestApp {
     val stream = from(1).zipWith(Stream("Peter", "Tomas", "Andrej", "Bobor", "Fafek", "Sumichrast" ))(_.toString.concat("_").concat(_))
     (stream take 4 ).toList.foreach(println)
 
+    println("startsWith")
+    println(s.startsWith(Stream(1, 2, 3)).toString)
+    println("does not start with")
+    println(s.startsWith(Stream(1, 2, 4)).toString)
 
+    println("====")
+    println("tails")
+    (from(1) take 10).tails.toList.foreach { s => s.toList.foreach(println); println("---"); }
   }
 }
 

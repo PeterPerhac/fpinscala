@@ -33,7 +33,7 @@ object MyModule {
     var acc = 1
     var i = n
     while (i > 0) {
-      acc *= i;
+      acc *= i
       i -= 1
     }
     acc
@@ -46,7 +46,7 @@ object MyModule {
     def rec(n: Int, prev: Int, curr: Int): Int = n match {
       case 0 => 0
       case 1 => curr
-      case n => rec(n - 1, curr, prev + curr)
+      case c => rec(c - 1, curr, prev + curr)
     }
 
     rec(n, 0, 1)
@@ -61,7 +61,7 @@ object MyModule {
 
   // We can generalize `formatAbs` and `formatFactorial` to
   // accept a _function_ as a parameter
-  def formatResult(name: String, n: Int, f: Int => Int) = {
+  def formatResult(name: String, n: Int, f: Int => Int): String = {
     val msg = "The %s of %d is %d."
     msg.format(name, n, f(n))
   }
@@ -106,7 +106,7 @@ object AnonymousFunctions {
     println(formatResult("increment3", 7, x => x + 1))
     println(formatResult("increment4", 7, _ + 1))
     println(formatResult("increment5", 7, x => {
-      val r = x + 1;
+      val r = x + 1
       r
     }))
   }
