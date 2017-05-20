@@ -6,7 +6,7 @@ import language.higherKinds
 
 trait Monoid[A] {
   def op(a1: A, a2: A): A
-  def zero: A
+  val zero: A
 }
 
 object Monoid {
