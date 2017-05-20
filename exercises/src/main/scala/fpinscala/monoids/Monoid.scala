@@ -42,14 +42,19 @@ object Monoid {
   }
 
   def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]]{
-     def op(o1: Option[A], o2: Option[A]): Option[A] = o1 orElse o2
-     val zero: Option[A] = Option.empty[A]
-   }
+    def op(o1: Option[A], o2: Option[A]): Option[A] = o1 orElse o2
+    val zero: Option[A] = Option.empty[A]
+  }
 
-   def endoMonoid[A]: Monoid[A=>A] = new Monoid[A=>A]{
-     def op(a1: A => A, a2: A => A): A => A = a1 andThen a2
-     val zero: A=>A = identity[A]
-   }
+  def dual[A](m: Monoid[A]): Monoid[A] = new Monoid[A]{
+    def op(a1: A, a2: A): A = m.op(a2,a1)
+    val zero: A = m.zero
+  }
+
+  def endoMonoid[A]: Monoid[A=>A] = new Monoid[A=>A]{
+    def op(a1: A => A, a2: A => A): A => A = a1 compose a2
+    val zero: A => A = identity[A]
+  }
 
   // TODO: Placeholder for `Prop`. Remove once you have implemented the `Prop`
   // data type from Part 2.
@@ -80,7 +85,12 @@ object Monoid {
     sys.error("todo")
 
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
-    sys.error("todo")
+    as.size match {
+      case 0 => m.zero
+      case 1 => f(as(0))
+      case n => val (fh, sh) = as splitAt (n / 2)
+      m.op(foldMapV(fh, m)(f), foldMapV(sh,m)(f))
+    }
 
   def ordered(ints: IndexedSeq[Int]): Boolean =
     sys.error("todo")
