@@ -36,7 +36,14 @@ object MyModule {
 
   // Exercise 1: Write a function to compute the nth fibonacci number
 
-  def fib(n: Int): Int = ???
+  def fib(n: Int): Int = {
+    @annotation.tailrec
+    def next(curr:Int, last: Int, prev: Int) : Int = curr match {
+      case 0 => last
+      case _ => next(curr-1, last + prev, last)
+    }
+    next(n, 0, 1)
+  }
 
   // This definition and `formatAbs` are very similar..
   private def formatFactorial(n: Int) = {
@@ -140,7 +147,11 @@ object PolymorphicFunctions {
 
   // Exercise 2: Implement a polymorphic function to check whether
   // an `Array[A]` is sorted
-  def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = ???
+  def isSorted[A](as: Array[A], gt: (A,A) => Boolean): Boolean = {
+    def srtd(curr:Boolean, currEl: A, t: Array[A]): Boolean =
+      t.length == 0 || (curr == gt(currEl, t(0)) && srtd(gt(currEl, t(0)), t(0), t.tail))
+    as.length <= 1 || srtd(gt(as(0), as.tail(0)), as.tail(0), as.tail.tail)
+  }
 
   // Polymorphic functions are often so constrained by their type
   // that they only have one implementation! Here's an example:
