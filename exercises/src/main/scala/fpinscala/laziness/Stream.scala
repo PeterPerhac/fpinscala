@@ -41,12 +41,20 @@ trait Stream[+A] {
   def forAll(p: A => Boolean): Boolean =
     this.foldRight(true)(p(_) && _)
 
-  def headOption: Option[A] = ???
+  def headOption: Option[A] =
+    if (this == Empty) None else Some(this.asInstanceOf[Cons[A]].h())
 
   // 5.7 map, filter, append, flatmap using foldRight. Part of the exercise is
   // writing your own function signatures.
+  //
+  def map[B](f: A => B): Stream[B] =
+    foldRight(empty[B])((h, t) => cons(f(h),t))
+
+  def filter(p: A => Boolean): Stream[A] =
+    foldRight(empty[A])((h,t) => if (p(h)) cons(h, t) else t)
 
   def startsWith[B](s: Stream[B]): Boolean = ???
+
 }
 case object Empty extends Stream[Nothing]
 case class Cons[+A](h: () => A, t: () => Stream[A]) extends Stream[A]
@@ -64,8 +72,25 @@ object Stream {
     if (as.isEmpty) empty
     else cons(as.head, apply(as.tail: _*))
 
-  val ones: Stream[Int] = Stream.cons(1, ones)
-  def from(n: Int): Stream[Int] = ???
+    val ones: Stream[Int] = Stream.cons(1, ones)
+    def from(n: Int): Stream[Int] = cons(n, from(n+1))
 
-  def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] = ???
+    def unfold[A, S](z: S)(f: S => Option[(A, S)]): Stream[A] =
+      f(z).fold(empty[A]){
+        case (a,s) => cons(a, unfold(s)(f))
+      }
+
+    val fibs:Stream[Int] =
+      unfold((0,1)){ case (n1, n2) => Some((n1, (n2, n1+n2))) }
+
+    def fromViaUnfold(n: Int): Stream[Int] =
+      unfold(n)(nn => Some((nn, nn+1)))
+
+    def constantViaUnfold[A](a: A) =
+      unfold(a)(_ => Some((a,a)))
+
+    val onesViaUnfold =
+      unfold(1)(_ => Some((1,1)))
+
+
 }
