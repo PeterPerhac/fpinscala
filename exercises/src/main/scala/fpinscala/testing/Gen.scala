@@ -20,6 +20,7 @@ object Prop {
 }
 
 object Gen {
+  def apply[A](a:State[RNG, A]): Gen[A] = ???
   def unit[A](a: => A): Gen[A] = ???
   def choose(start: Int, stopExclusive: Int): Gen[Int] =
     Gen(State(RNG.nonNegativeInt).map(n => start + n % (stopExclusive-start)))
