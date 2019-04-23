@@ -6,7 +6,7 @@ import language.higherKinds
 
 trait Monoid[A] {
   def op(a1: A, a2: A): A
-  val zero: A
+  def zero: A
 }
 
 object Monoid {
@@ -21,40 +21,17 @@ object Monoid {
     val zero = Nil
   }
 
-  val intAddition: Monoid[Int] = new Monoid[Int]{
-    def op(a1: Int, a2: Int) = a1 + a2
-    val zero = 0
-  }
+  val intAddition: Monoid[Int] = ???
 
-  val intMultiplication: Monoid[Int] = new Monoid[Int]{
-    def op(a1: Int, a2: Int) = a1 * a2
-    val zero = 1
-  }
+  val intMultiplication: Monoid[Int] = ???
 
-  val booleanOr: Monoid[Boolean] = new Monoid[Boolean]{
-    def op(a1: Boolean, a2: Boolean) = a1 || a2
-    val zero = false
-  }
+  val booleanOr: Monoid[Boolean] = ???
 
-  val booleanAnd: Monoid[Boolean] = new Monoid[Boolean]{
-    def op(a1: Boolean, a2: Boolean) = a1 && a2
-    val zero = true
-  }
+  val booleanAnd: Monoid[Boolean] = ???
 
-  def optionMonoid[A]: Monoid[Option[A]] = new Monoid[Option[A]]{
-    def op(o1: Option[A], o2: Option[A]): Option[A] = o1 orElse o2
-    val zero: Option[A] = Option.empty[A]
-  }
+  def optionMonoid[A]: Monoid[Option[A]] = ???
 
-  def dual[A](m: Monoid[A]): Monoid[A] = new Monoid[A]{
-    def op(a1: A, a2: A): A = m.op(a2,a1)
-    val zero: A = m.zero
-  }
-
-  def endoMonoid[A]: Monoid[A=>A] = new Monoid[A=>A]{
-    def op(a1: A => A, a2: A => A): A => A = a1 compose a2
-    val zero: A => A = identity[A]
-  }
+  def endoMonoid[A]: Monoid[A => A] = ???
 
   // TODO: Placeholder for `Prop`. Remove once you have implemented the `Prop`
   // data type from Part 2.
@@ -65,110 +42,97 @@ object Monoid {
 
   import fpinscala.testing._
   import Prop._
-  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = sys.error("todo")
+  def monoidLaws[A](m: Monoid[A], gen: Gen[A]): Prop = ???
 
-  val trimMonoid: Monoid[String] = new Monoid[String] {
-    def op(a1: String, a2: String) = a1.trim + " " + a2.trim
-    val zero = ""
-  }
+  def trimMonoid(s: String): Monoid[String] = ???
 
   def concatenate[A](as: List[A], m: Monoid[A]): A =
-    as.foldLeft(m.zero)(m.op)
+    ???
 
   def foldMap[A, B](as: List[A], m: Monoid[B])(f: A => B): B =
-    concatenate(as map f, m)
+    ???
 
   def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B): B =
-    sys.error("todo")
+    ???
 
   def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B): B =
-    sys.error("todo")
+    ???
 
   def foldMapV[A, B](as: IndexedSeq[A], m: Monoid[B])(f: A => B): B =
-    as.size match {
-      case 0 => m.zero
-      case 1 => f(as(0))
-      case n => val (fh, sh) = as splitAt (n / 2)
-      m.op(foldMapV(fh, m)(f), foldMapV(sh,m)(f))
-    }
+    ???
 
-  def ordered(ints: IndexedSeq[Int]): Boolean = {
-    val orderedMonoid: Monoid[(Int, Boolean)] = new Monoid[(Int,Boolean)] {
-      val zero: (Int, Boolean) = Int.MinValue -> true
-      def op(t1:(Int, Boolean), t2: (Int, Boolean)) = 0 -> true
-    }
-    foldMapV(ints, orderedMonoid)(i => (i, true))._2
-  }
+  def ordered(ints: IndexedSeq[Int]): Boolean =
+    ???
 
   sealed trait WC
   case class Stub(chars: String) extends WC
   case class Part(lStub: String, words: Int, rStub: String) extends WC
 
   def par[A](m: Monoid[A]): Monoid[Par[A]] = 
-    sys.error("todo")
+    ???
 
   def parFoldMap[A,B](v: IndexedSeq[A], m: Monoid[B])(f: A => B): Par[B] = 
-    sys.error("todo") 
+    ???
 
-  lazy val wcMonoid: Monoid[WC] = sys.error("todo")
+  val wcMonoid: Monoid[WC] = ???
 
-  def count(s: String): Int = sys.error("todo")
+  def count(s: String): Int = ???
 
   def productMonoid[A,B](A: Monoid[A], B: Monoid[B]): Monoid[(A, B)] =
-    sys.error("todo")
+    ???
 
   def functionMonoid[A,B](B: Monoid[B]): Monoid[A => B] =
-    sys.error("todo")
+    ???
 
   def mapMergeMonoid[K,V](V: Monoid[V]): Monoid[Map[K, V]] =
-    sys.error("todo")
+    ???
 
   def bag[A](as: IndexedSeq[A]): Map[A, Int] =
-    sys.error("todo")
+    ???
 }
 
 trait Foldable[F[_]] {
   import Monoid._
 
   def foldRight[A, B](as: F[A])(z: B)(f: (A, B) => B): B =
-    sys.error("todo")
+    ???
 
   def foldLeft[A, B](as: F[A])(z: B)(f: (B, A) => B): B =
-    sys.error("todo")
+    ???
 
   def foldMap[A, B](as: F[A])(f: A => B)(mb: Monoid[B]): B =
-    sys.error("todo")
+    ???
 
   def concatenate[A](as: F[A])(m: Monoid[A]): A =
-    sys.error("todo")
+    ???
 
   def toList[A](as: F[A]): List[A] =
-    sys.error("todo")
+    ???
 }
 
 object ListFoldable extends Foldable[List] {
   override def foldRight[A, B](as: List[A])(z: B)(f: (A, B) => B) =
-    sys.error("todo")
+    ???
   override def foldLeft[A, B](as: List[A])(z: B)(f: (B, A) => B) =
-    sys.error("todo")
+    ???
   override def foldMap[A, B](as: List[A])(f: A => B)(mb: Monoid[B]): B =
-    sys.error("todo")
+    ???
 }
 
 object IndexedSeqFoldable extends Foldable[IndexedSeq] {
   override def foldRight[A, B](as: IndexedSeq[A])(z: B)(f: (A, B) => B) =
-    sys.error("todo")
+    ???
   override def foldLeft[A, B](as: IndexedSeq[A])(z: B)(f: (B, A) => B) =
-    sys.error("todo")
+    ???
   override def foldMap[A, B](as: IndexedSeq[A])(f: A => B)(mb: Monoid[B]): B =
-    sys.error("todo")
+    ???
 }
 
 object StreamFoldable extends Foldable[Stream] {
   override def foldRight[A, B](as: Stream[A])(z: B)(f: (A, B) => B) =
-    sys.error("todo")
+    ???
   override def foldLeft[A, B](as: Stream[A])(z: B)(f: (B, A) => B) =
-    sys.error("todo")
+    ???
 }
 
 sealed trait Tree[+A]
@@ -177,19 +141,19 @@ case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
 object TreeFoldable extends Foldable[Tree] {
   override def foldMap[A, B](as: Tree[A])(f: A => B)(mb: Monoid[B]): B =
-    sys.error("todo")
+    ???
   override def foldLeft[A, B](as: Tree[A])(z: B)(f: (B, A) => B) =
-    sys.error("todo")
+    ???
   override def foldRight[A, B](as: Tree[A])(z: B)(f: (A, B) => B) =
-    sys.error("todo")
+    ???
 }
 
 object OptionFoldable extends Foldable[Option] {
   override def foldMap[A, B](as: Option[A])(f: A => B)(mb: Monoid[B]): B =
-    sys.error("todo")
+    ???
   override def foldLeft[A, B](as: Option[A])(z: B)(f: (B, A) => B) =
-    sys.error("todo")
+    ???
   override def foldRight[A, B](as: Option[A])(z: B)(f: (A, B) => B) =
-    sys.error("todo")
+    ???
 }
 
